@@ -1,11 +1,14 @@
+import os
 import aiosqlite
 import uuid
 from datetime import datetime
+from pathlib import Path
 from config import DB_PATH
 
 
 async def init_db():
     """Ma'lumotlar bazasini yaratish va jadvallarni sozlash."""
+    Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
     async with aiosqlite.connect(DB_PATH) as db:
         # Foydalanuvchilar jadvali
         await db.execute("""
