@@ -10,12 +10,15 @@ from database import init_db
 from handlers import router as user_router
 from admin import router as admin_router
 from middlewares import AntiSpamMiddleware, BanCheckMiddleware
-from logger_config import setup_logging
 
 # ============================================================
 # LOG TIZIMI
 # ============================================================
-logger = setup_logging()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(name)s — %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 
 # ============================================================
