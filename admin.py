@@ -438,3 +438,124 @@ async def show_stats(message: Message):
 @router.message(F.text == "🔙 Oddiy menyu")
 async def back_to_main(message: Message):
     await message.answer("Bosh menyuga qaytdingiz.", reply_markup=main_menu_kb())
+
+
+# ============================================================
+# 📋 YANGI SO'ROVLAR (PENDING ORDERS)
+# ============================================================
+@router.message(F.text == "📋 Yangi so'rovlar")
+async def show_pending_orders(message: Message):
+    if not await is_admin(message.from_user.id):
+        return
+
+    orders = await get_pending_orders()
+    if not orders:
+        await message.answer("✅ Hozircha kutilayotgan so'rovlar yo'q.")
+        return
+
+    for order in orders:
+        username = f"@{order['username']}" if order.get("username") else order.get("full_name", "—")
+        text = (
+            f"🆕 <b>Yangi so'rov #{order['id']}</b>\n\n"
+            f"👤 Foydalanuvchi: {username} (<code>{order['user_id']}</code>)\n"
+            f"🎮 FF ID: <code>{order['ff_id']}</code>\n"
+            f"💎 Ball: <b>{order['points_spent']}</b>\n"
+            f"📅 Vaqt: {order['created_at'][:16]}"
+        )
+        await message.answer(text, parse_mode="HTML", reply_markup=admin_order_kb(order["id"]))
+
+
+# ============================================================
+# ❌ BUYURTMANI RAD ETISH
+# ============================================================
+@router.callback_query(F.data.startswith("admin_reject:"))
+async def reject_order_proc(callback: CallbackQuery, state: FSMContext):
+    order_id = int(callback.data.split(":")[1])
+    await state.update_data(reject_order_id=order_id)
+    await state.set_state(AdminState.waiting_for_reject_reason)
+    await callback.message.answer(
+        f"❌ <b>Buyurtma #{order_id} ni rad etish</b>\n\nRad etish sababini yozing:",
+        parse_mode="HTML",
+        reply_markup=cancel_kb()
+    )
+    await callback.answer()
+
+
+@router.message(AdminState.waiting_for_reject_reason)
+async def process_reject_reason(message: Message, state: FSMContext):
+    if not await is_admin(message.from_user.id):
+        return
+
+    data = await state.get_data()
+    order_id = data.get("reject_order_id")
+    reason = message.text.strip()
+
+    order = await get_order(order_id)
+    if not order:
+        await message.answer("❌ Buyurtma topilmadi!")
+        await state.clear()
+        return
+
+    # Ballarni qaytarish
+    await add_points(order["user_id"], order["points_spent"])
+    await update_order_status(order_id, "rejected", reason)
+
+    await message.answer(
+        f"✅ Buyurtma #{order_id} rad etildi. Foydalanuvchiga {order['points_spent']} ball qaytarildi.",
+        reply_markup=admin_menu_kb()
+    )
+
+    try:
+        await message.bot.send_message(
+            order["user_id"],
+            f"❌ <b>Buyurtmangiz rad etildi.</b>\n\n"
+            f"📋 Buyurtma #{order_id}\n"
+            f"📝 Sabab: {reason}\n\n"
+            f"💎 {order['points_spent']} ball hisobingizga qaytarildi.",
+            parse_mode="HTML"
+        )
+    except Exception:
+        pass
+
+    await state.clear()
+
+
+# ============================================================
+# 💎 BALL QO'SHISH / AYIRISH (ADMIN)
+# ============================================================
+@router.callback_query(F.data.startswith("admin_add_points:"))
+async def admin_add_points_cb(callback: CallbackQuery):
+    parts = callback.data.split(":")
+    target_user_id = int(parts[1])
+    amount = int(parts[2])
+
+    await add_points(target_user_id, amount)
+    user = await get_user(target_user_id)
+    await callback.answer(f"✅ +{amount} ball qo'shildi!", show_alert=True)
+    await callback.message.edit_reply_markup(
+        reply_markup=user_manage_kb(target_user_id, user["is_banned"])
+    )
+
+
+@router.callback_query(F.data.startswith("admin_sub_points:"))
+async def admin_sub_points_cb(callback: CallbackQuery):
+    parts = callback.data.split(":")
+    target_user_id = int(parts[1])
+    amount = int(parts[2])
+
+    await deduct_points(target_user_id, amount)
+    user = await get_user(target_user_id)
+    await callback.answer(f"✅ -{amount} ball ayirildi!", show_alert=True)
+    await callback.message.edit_reply_markup(
+        reply_markup=user_manage_kb(target_user_id, user["is_banned"])
+    )
+
+
+# ============================================================
+# ❌ BUYURTMANI BEKOR QILISH (FOYDALANUVCHI)
+# ============================================================
+@router.callback_query(F.data == "cancel_order")
+async def cancel_order_cb(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.edit_text("❌ Buyurtma bekor qilindi.")
+    await callback.answer()
