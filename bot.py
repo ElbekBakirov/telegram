@@ -46,6 +46,28 @@ async def main():
     # Boshlang'ich sozlamalarni bazaga yozish (agar bo'sh bo'lsa)
     from database import get_setting, set_setting
     from config import ADMIN_IDS, CHANNEL_ID, CHANNEL_USERNAME
+
+    if not ADMIN_IDS:
+        logger.critical(
+            "❌ ADMIN_IDS bo'sh! Bot ishga tushmaydi. "
+            "Railway → Variables bo'limida ADMIN_IDS ni to'g'ri o'rnating."
+        )
+        raise ValueError("ADMIN_IDS environment variable bo'sh yoki noto'g'ri format.")
+
+    if not CHANNEL_ID:
+        logger.critical(
+            "❌ CHANNEL_ID bo'sh! Bot ishga tushmaydi. "
+            "Railway → Variables bo'limida CHANNEL_ID ni to'g'ri o'rnating."
+        )
+        raise ValueError("CHANNEL_ID environment variable bo'sh.")
+
+    if not CHANNEL_USERNAME:
+        logger.critical(
+            "❌ CHANNEL_USERNAME bo'sh! Bot ishga tushmaydi. "
+            "Railway → Variables bo'limida CHANNEL_USERNAME ni to'g'ri o'rnating."
+        )
+        raise ValueError("CHANNEL_USERNAME environment variable bo'sh.")
+
     if not await get_setting("admin_id"):
         await set_setting("admin_id", str(ADMIN_IDS[0]))
     if not await get_setting("channel_id"):

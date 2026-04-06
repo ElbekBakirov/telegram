@@ -26,4 +26,22 @@ MIN_POINTS_FOR_ORDER: int = int(os.getenv("MIN_POINTS_FOR_ORDER", "100"))
 DB_PATH: str = os.getenv("DB_PATH", "bot_database.db")
 
 if not BOT_TOKEN:
-    raise ValueError("❌ BOT_TOKEN .env faylida topilmadi!")
+    raise ValueError("❌ BOT_TOKEN environment variable topilmadi!")
+
+if not ADMIN_IDS:
+    raise ValueError(
+        "❌ ADMIN_IDS environment variable topilmadi yoki noto'g'ri format! "
+        "Misol: ADMIN_IDS=123456789 yoki ADMIN_IDS=123456789,987654321"
+    )
+
+if not CHANNEL_ID:
+    raise ValueError(
+        "❌ CHANNEL_ID environment variable topilmadi yoki bo'sh! "
+        "Misol: CHANNEL_ID=-1001234567890"
+    )
+
+if not CHANNEL_USERNAME:
+    raise ValueError(
+        "❌ CHANNEL_USERNAME environment variable topilmadi yoki bo'sh! "
+        "Misol: CHANNEL_USERNAME=@mening_kanalim"
+    )
