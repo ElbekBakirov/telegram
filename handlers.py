@@ -26,6 +26,7 @@ from database import (
     create_order,
     get_user_orders,
     get_setting,
+    get_all_payment_cards,
 )
 from keyboards import (
     main_menu_kb,
@@ -271,21 +272,38 @@ async def confirm_order(callback: CallbackQuery, state: FSMContext):
 # ============================================================
 @router.message(F.text == "💎 Olmos sotib olish")
 async def buy_diamonds(message: Message):
-    card_info = await get_setting("card_info", "Karta kiritilmagan")
+    cards = await get_all_payment_cards()
     card_phone = await get_setting("card_phone", "Raqam kiritilmagan")
     buy_rules = await get_setting("buy_rules", "Sotib olish shartlari hali kiritilmagan.")
 
-    await message.answer(
-        f"💎 <b>Almaz sotib olish</b>\n\n"
-        f"Siz Almazlarni arzon narxlarda xarid qilishingiz mumkin!\n\n"
-        f"💳 <b>To'lov uchun karta:</b>\n"
-        f"<code>{card_info}</code>\n"
-        f"📞 <b>Bog'lanish:</b> {card_phone}\n\n"
-        f"📜 <b>Sotib olish shartlari:</b>\n"
-        f"{buy_rules}\n\n"
-        f"⚠️ To'lov qilganingizdan so'ng, chekni va Free Fire ID raqamingizni @admin ga yuboring.",
-        parse_mode="HTML"
-    )
+    if not cards:
+        await message.answer(
+            "💎 <b>Almaz sotib olish</b>\n\n"
+            "⚠️ Hozircha to'lov kartalari kiritilmagan.\n\n"
+            "Tez orada kartalar qo'shiladi. Iltimos, keyinroq urinib ko'ring.",
+            parse_mode="HTML"
+        )
+        return
+
+    text = "💎 <b>Almaz sotib olish</b>\n\n"
+    text += "Siz Almazlarni arzon narxlarda xarid qilishingiz mumkin!\n\n"
+    text += "💳 <b>To'lov uchun kartalar:</b>\n\n"
+
+    for card in cards:
+        text += (
+            f"🏦 <b>{card['bank_name']}</b>\n"
+            f"💳 Karta: <code>{card['card_number']}</code>\n"
+            f"👤 Egal: {card['card_holder']}\n"
+            f"� Muddat: {card['expiry_date']}\n"
+            f"➖➖➖➖➖➖➖➖➖➖\n"
+        )
+
+    text += f"\n�📞 <b>Bog'lanish:</b> {card_phone}\n\n"
+    text += f"📜 <b>Sotib olish shartlari:</b>\n"
+    text += f"{buy_rules}\n\n"
+    text += "⚠️ To'lov qilganingizdan so'ng, chekni va Free Fire ID raqamingizni @admin ga yuboring."
+
+    await message.answer(text, parse_mode="HTML")
 
 
 # ============================================================

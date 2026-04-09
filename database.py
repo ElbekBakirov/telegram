@@ -59,6 +59,19 @@ async def init_db():
             )
         """)
 
+        # To'lov kartalari jadvali
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS payment_cards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                card_number TEXT NOT NULL,
+                card_holder TEXT NOT NULL,
+                expiry_date TEXT NOT NULL,
+                bank_name TEXT NOT NULL,
+                is_active INTEGER DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
         await db.commit()
 
 
@@ -323,3 +336,60 @@ async def get_stats() -> dict:
         "today_users": today_users,
         "top_referrals": top_referrals
     }
+
+
+# ============================================================
+# KARTA FUNKSIYALARI
+# ============================================================
+
+async def add_payment_card(card_number: str, card_holder: str, expiry_date: str, bank_name: str) -> int:
+    """Yangi karta qo'shish. Qaytadi: card ID."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("""
+            INSERT INTO payment_cards (card_number, card_holder, expiry_date, bank_name)
+            VALUES (?, ?, ?, ?)
+        """, (card_number, card_holder, expiry_date, bank_name))
+        await db.commit()
+        return cursor.lastrowid
+
+
+async def get_all_payment_cards() -> list:
+    """Barcha faol kartalar ro'yxati."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM payment_cards WHERE is_active = 1 ORDER BY created_at DESC"
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
+
+
+async def get_payment_card(card_id: int) -> dict | None:
+    """Kartani ID bo'yicha topish."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM payment_cards WHERE id = ?", (card_id,)
+        ) as cursor:
+            row = await cursor.fetchone()
+            return dict(row) if row else None
+
+
+async def delete_payment_card(card_id: int):
+    """Kartani o'chirish (soft delete)."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "UPDATE payment_cards SET is_active = 0 WHERE id = ?", (card_id,)
+        )
+        await db.commit()
+
+
+async def get_active_payment_card() -> dict | None:
+    """Birinchi faol kartani olish."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM payment_cards WHERE is_active = 1 LIMIT 1"
+        ) as cursor:
+            row = await cursor.fetchone()
+            return dict(row) if row else None

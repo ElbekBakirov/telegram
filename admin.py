@@ -21,6 +21,11 @@ from database import (
     unban_user,
     get_setting,
     set_setting,
+    add_payment_card,
+    get_all_payment_cards,
+    get_payment_card,
+    delete_payment_card,
+    get_active_payment_card,
 )
 from keyboards import (
     admin_menu_kb,
@@ -72,6 +77,12 @@ class AdminState(StatesGroup):
     waiting_for_new_channel_user = State()
     waiting_for_migration_msg = State()
     waiting_for_migration_confirm = State()
+
+    # Karta boshqarish holatlari
+    waiting_for_card_number = State()
+    waiting_for_card_holder = State()
+    waiting_for_expiry_date = State()
+    waiting_for_bank_name = State()
 
 
 # ============================================================
@@ -571,4 +582,190 @@ async def admin_sub_points_cb(callback: CallbackQuery):
 async def cancel_order_cb(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.edit_text("❌ Buyurtma bekor qilindi.")
+    await callback.answer()
+
+
+# ============================================================
+# 💳 KARTA BOSHQARISH
+# ============================================================
+
+@router.message(F.text == "💳 Kartalar")
+async def show_cards(message: Message):
+    if not await is_admin(message.from_user.id):
+        return
+
+    cards = await get_all_payment_cards()
+    if not cards:
+        await message.answer(
+            "📋 <b>Hozircha karta yo'q.</b>\n\n"
+            "Yangi karta qo'shish uchun quyidagi tugmani bosing.",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="➕ Karta qo'shish", callback_data="add_card")],
+                    [InlineKeyboardButton(text="🔙 Admin menyu", callback_data="back_to_admin")]
+                ]
+            ),
+            parse_mode="HTML"
+        )
+        return
+
+    text = "💳 <b>Mavjud kartalar:</b>\n\n"
+    buttons = []
+    for card in cards:
+        text += (
+            f"🔹 <b>ID: {card['id']}</b>\n"
+            f"🏦 Bank: {card['bank_name']}\n"
+            f"💳 Karta: {card['card_number']}\n"
+            f"👤 Egal: {card['card_holder']}\n"
+            f"📅 Muddat: {card['expiry_date']}\n"
+            f"➖➖➖➖➖➖➖➖➖➖\n"
+        )
+        buttons.append([InlineKeyboardButton(text=f"🗑️ O'chirish (ID: {card['id']})", callback_data=f"delete_card:{card['id']}")])
+
+    buttons.append([InlineKeyboardButton(text="➕ Karta qo'shish", callback_data="add_card")])
+    buttons.append([InlineKeyboardButton(text="🔙 Admin menyu", callback_data="back_to_admin")])
+
+    await message.answer(
+        text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+        parse_mode="HTML"
+    )
+
+
+@router.callback_query(F.data == "add_card")
+async def start_add_card(callback: CallbackQuery, state: FSMContext):
+    if not await is_admin(callback.from_user.id):
+        return
+
+    await state.set_state(AdminState.waiting_for_card_number)
+    await callback.message.edit_text(
+        "💳 <b>Yangi karta qo'shish</b>\n\n"
+        "Karta raqamini kiriting (misol: 8600 1234 5678 9012):",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="back_to_admin")]
+            ]
+        ),
+        parse_mode="HTML"
+    )
+    await callback.answer()
+
+
+@router.message(AdminState.waiting_for_card_number)
+async def process_card_number(message: Message, state: FSMContext):
+    if not await is_admin(message.from_user.id):
+        return
+
+    card_number = message.text.strip()
+    await state.update_data(card_number=card_number)
+    await state.set_state(AdminState.waiting_for_card_holder)
+
+    await message.answer(
+        "👤 <b>Karta egasining ismini kiriting:</b>",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="back_to_admin")]
+            ]
+        ),
+        parse_mode="HTML"
+    )
+
+
+@router.message(AdminState.waiting_for_card_holder)
+async def process_card_holder(message: Message, state: FSMContext):
+    if not await is_admin(message.from_user.id):
+        return
+
+    card_holder = message.text.strip()
+    await state.update_data(card_holder=card_holder)
+    await state.set_state(AdminState.waiting_for_expiry_date)
+
+    await message.answer(
+        "📅 <b>Muddatni kiriting (MM/YY formatida):</b>\n\n"
+        "Misol: 12/25",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="back_to_admin")]
+            ]
+        ),
+        parse_mode="HTML"
+    )
+
+
+@router.message(AdminState.waiting_for_expiry_date)
+async def process_expiry_date(message: Message, state: FSMContext):
+    if not await is_admin(message.from_user.id):
+        return
+
+    expiry_date = message.text.strip()
+    await state.update_data(expiry_date=expiry_date)
+    await state.set_state(AdminState.waiting_for_bank_name)
+
+    await message.answer(
+        "🏦 <b>Bank nomini kiriting:</b>\n\n"
+        "Misol: UzumBank, TBC Bank, Payme",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="back_to_admin")]
+            ]
+        ),
+        parse_mode="HTML"
+    )
+
+
+@router.message(AdminState.waiting_for_bank_name)
+async def process_bank_name(message: Message, state: FSMContext):
+    if not await is_admin(message.from_user.id):
+        return
+
+    bank_name = message.text.strip()
+    data = await state.get_data()
+
+    card_number = data.get("card_number")
+    card_holder = data.get("card_holder")
+    expiry_date = data.get("expiry_date")
+
+    # Karta qo'shish
+    card_id = await add_payment_card(card_number, card_holder, expiry_date, bank_name)
+
+    await message.answer(
+        f"✅ <b>Karta muvaffaqiyatli qo'shildi!</b>\n\n"
+        f"🔹 ID: {card_id}\n"
+        f"💳 Karta: {card_number}\n"
+        f"👤 Egal: {card_holder}\n"
+        f"📅 Muddat: {expiry_date}\n"
+        f"🏦 Bank: {bank_name}",
+        reply_markup=admin_menu_kb(),
+        parse_mode="HTML"
+    )
+    await state.clear()
+
+
+@router.callback_query(F.data.startswith("delete_card:"))
+async def delete_card(callback: CallbackQuery):
+    if not await is_admin(callback.from_user.id):
+        return
+
+    card_id = int(callback.data.split(":")[1])
+    await delete_payment_card(card_id)
+
+    await callback.answer("✅ Karta o'chirildi!", show_alert=True)
+    await callback.message.edit_text(
+        "✅ Karta o'chirildi.",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="🔙 Admin menyu", callback_data="back_to_admin")]
+            ]
+        )
+    )
+
+
+@router.callback_query(F.data == "back_to_admin")
+async def back_to_admin(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.edit_text(
+        "👮‍♂️ <b>Admin Panel</b>",
+        reply_markup=admin_menu_kb(),
+        parse_mode="HTML"
+    )
     await callback.answer()

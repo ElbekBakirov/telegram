@@ -29,9 +29,9 @@ def admin_menu_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="📋 Yangi so'rovlar"), KeyboardButton(text="👥 Foydalanuvchilar")],
-            [KeyboardButton(text="📢 Reklama yuborish"), KeyboardButton(text="⚙️ Bot sozlamalari")],
-            [KeyboardButton(text="📊 Statistika"), KeyboardButton(text="🔑 Adminni ko'chirish")],
-            [KeyboardButton(text="🔙 Oddiy menyu")],
+            [KeyboardButton(text="� Kartalar"), KeyboardButton(text="�📢 Reklama yuborish")],
+            [KeyboardButton(text="⚙️ Bot sozlamalari"), KeyboardButton(text="📊 Statistika")],
+            [KeyboardButton(text="🔑 Adminni ko'chirish"), KeyboardButton(text="🔙 Oddiy menyu")],
         ],
         resize_keyboard=True,
         input_field_placeholder="Admin paneli (V2.0)..."
