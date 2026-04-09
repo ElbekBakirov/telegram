@@ -39,7 +39,6 @@ router = Router()
 # ============================================================
 @router.message(F.text == "❌ Bekor qilish")
 @router.message(Command("cancel"))
-@router.message(CommandStart())
 async def cancel_handler(message: Message, state: FSMContext):
     """Har qanday holatni bekor qilish va menyuga qaytish."""
     current_state = await state.get_state()
@@ -47,15 +46,6 @@ async def cancel_handler(message: Message, state: FSMContext):
         return
         
     await state.clear()
-    if message.text == "/start":
-        # /start bo'lsa, user_router o'zi ishlaydi, shuning uchun bu yerda return qilamiz 
-        # va keyingi handlerni kutamiz? 
-        # Yo'q, admin_router birinchi bo'lgani uchun, u ushlab qoladi.
-        # Shuning uchun /start ni bu yerda ham qo'lda ishga tushirishimiz kerak.
-        from handlers import cmd_start
-        await cmd_start(message, state)
-        return
-
     await message.answer(
         "❌ Amaliyot bekor qilindi.",
         reply_markup=admin_menu_kb() if await is_admin(message.from_user.id) else main_menu_kb()
