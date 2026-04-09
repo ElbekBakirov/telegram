@@ -317,6 +317,24 @@ async def buy_diamonds(message: Message):
 
 
 # ============================================================
+# 🛑 HOLATNI BEKOR QILISH (FOYDALANUVCHI)
+# ============================================================
+@router.message(F.text == "❌ Bekor qilish")
+@router.message(Command("cancel"))
+async def cancel_handler(message: Message, state: FSMContext):
+    """Har qanday holatni bekor qilish va menyuga qaytish."""
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    await state.clear()
+    await message.answer(
+        "❌ Amaliyot bekor qilindi.",
+        reply_markup=main_menu_kb()
+    )
+
+
+# ============================================================
 # ✅ KANAL TEKSHIRUV VA BOSHQA
 # ============================================================
 @router.callback_query(F.data == "check_subscription")
