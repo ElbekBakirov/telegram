@@ -591,10 +591,13 @@ async def cancel_order_cb(callback: CallbackQuery, state: FSMContext):
 
 @router.message(F.text == "💳 Kartalar")
 async def show_cards(message: Message):
+    logger.info(f"📋 Kartalar handler ishga tushdi: {message.from_user.id}")
     if not await is_admin(message.from_user.id):
+        logger.warning(f"⚠️ Foydalanuvchi admin emas: {message.from_user.id}")
         return
 
     cards = await get_all_payment_cards()
+    logger.info(f"📋 Kartalar soni: {len(cards)}")
     if not cards:
         await message.answer(
             "📋 <b>Hozircha karta yo'q.</b>\n\n"

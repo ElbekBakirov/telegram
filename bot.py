@@ -76,8 +76,8 @@ async def main():
         await set_setting("channel_username", CHANNEL_USERNAME)
 
     # Router'larni ulash
-    dp.include_router(admin_router)   # Admin birinchi (ustunlik)
-    dp.include_router(user_router)    # Foydalanuvchi
+    dp.include_router(user_router)    # Foydalanuvchi birinchi
+    dp.include_router(admin_router)   # Admin ikkinchi (admin handlerlar ustunlik qiladi)
 
     # Botni ishga tushirish
     bot_info = await bot.get_me()
