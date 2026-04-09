@@ -10,6 +10,11 @@ async def init_db():
     """Ma'lumotlar bazasini yaratish va jadvallarni sozlash."""
     Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
     async with aiosqlite.connect(DB_PATH) as db:
+        # Jadval mavjudligini tekshirish
+        cursor = await db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='payment_cards'")
+        table_exists = await cursor.fetchone()
+        print(f"📊 payment_cards jadvali mavjud: {bool(table_exists)}")
+
         # Foydalanuvchilar jadvali
         await db.execute("""
             CREATE TABLE IF NOT EXISTS users (
@@ -71,6 +76,7 @@ async def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        print("✅ payment_cards jadvali yaratildi/yangilandi")
 
         await db.commit()
 
@@ -361,7 +367,9 @@ async def get_all_payment_cards() -> list:
             "SELECT * FROM payment_cards WHERE is_active = 1 ORDER BY created_at DESC"
         ) as cursor:
             rows = await cursor.fetchall()
-            return [dict(r) for r in rows]
+            cards = [dict(r) for r in rows]
+            print(f"📋 {len(cards)} ta karta topildi")
+            return cards
 
 
 async def get_payment_card(card_id: int) -> dict | None:

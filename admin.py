@@ -728,8 +728,21 @@ async def process_bank_name(message: Message, state: FSMContext):
     card_holder = data.get("card_holder")
     expiry_date = data.get("expiry_date")
 
+    logger.info(f"💳 Karta qo'shmoqda: {bank_name} - {card_number}")
+
     # Karta qo'shish
-    card_id = await add_payment_card(card_number, card_holder, expiry_date, bank_name)
+    try:
+        card_id = await add_payment_card(card_number, card_holder, expiry_date, bank_name)
+        logger.info(f"✅ Karta qo'shildi: ID={card_id}")
+    except Exception as e:
+        logger.error(f"❌ Karta qo'shishda xato: {e}")
+        await message.answer(
+            f"❌ Karta qo'shishda xatolik yuz berdi: {e}",
+            reply_markup=admin_menu_kb(),
+            parse_mode="HTML"
+        )
+        await state.clear()
+        return
 
     await message.answer(
         f"✅ <b>Karta muvaffaqiyatli qo'shildi!</b>\n\n"
