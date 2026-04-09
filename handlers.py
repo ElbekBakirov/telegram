@@ -53,12 +53,22 @@ async def check_subscription(bot: Bot, user_id: int) -> bool:
     """Foydalanuvchining kanalga a'zo ekanligini tekshirish."""
     try:
         # Bazadan kanal ID sini olish, bo'lmasa configdagini ishlatish
-        channel_id = await get_setting("channel_id", CHANNEL_ID)
+        channel_id_str = await get_setting("channel_id", CHANNEL_ID)
+        # Channel ID ni integer ga o'tkazish (manfiy son bo'lishi kerak)
+        channel_id = int(channel_id_str) if channel_id_str else None
+
+        if not channel_id:
+            logger.error("❌ Channel ID topilmadi!")
+            return True  # Fallback: ruxsat berish
+
         member = await bot.get_chat_member(chat_id=channel_id, user_id=user_id)
         return member.status in ["member", "administrator", "creator"]
     except Exception as e:
         logger.error(f"❌ obuna tekshirishda xato (User: {user_id}): {e}")
-        return False
+        # Agar bot kanalga a'zolikni tekshira olmasa, foydalanuvchiga ruxsat berish
+        # (bot kanalga admin emas bo'lishi mumkin)
+        logger.warning(f"⚠️ Subscription check failed, allowing user (User: {user_id})")
+        return True
 
 
 # ============================================================
