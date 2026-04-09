@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
@@ -32,6 +34,9 @@ from keyboards import (
     order_confirm_kb,
     admin_order_kb,
 )
+from utils import notify_admins
+
+logger = logging.getLogger(__name__)
 
 router = Router()
 
@@ -55,8 +60,7 @@ async def check_subscription(bot: Bot, user_id: int) -> bool:
         member = await bot.get_chat_member(chat_id=channel_id, user_id=user_id)
         return member.status in ["member", "administrator", "creator"]
     except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"❌ obuna tekshirishda xato (User: {user_id}): {e}")
+        logger.error(f"❌ obuna tekshirishda xato (User: {user_id}): {e}")
         return False
 
 
@@ -185,7 +189,7 @@ async def earn_points(message: Message):
 # ============================================================
 # 🛒 BUYURTMA BERISH (BALL ORQALI)
 # ============================================================
-@router.message(F.text == "🛒 Almaz olish (Ball orqali)")
+@router.message(F.text == "🛒 Buyurtma berish (Ball orqali)")
 async def start_order(message: Message, state: FSMContext):
     user = await get_user(message.from_user.id)
     min_points = int(await get_setting("min_points", MIN_POINTS_FOR_ORDER))
@@ -254,7 +258,6 @@ async def confirm_order(callback: CallbackQuery, state: FSMContext):
         parse_mode="HTML"
     )
     
-    from utils import notify_admins
     await notify_admins(
         callback.bot,
         f"🆕 <b>Yangi so'rov!</b>\n\n"
