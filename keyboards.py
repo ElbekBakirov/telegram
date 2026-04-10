@@ -5,6 +5,23 @@ from aiogram.types import (
     InlineKeyboardButton,
 )
 from config import CHANNEL_USERNAME
+from constants import (
+    BTN_PROFILE,
+    BTN_EARN_POINTS,
+    BTN_ORDER_POINTS,
+    BTN_BUY_DIAMONDS,
+    BTN_MY_ORDERS,
+    BTN_HELP,
+    BTN_ADMIN_STATS,
+    BTN_ADMIN_USERS,
+    BTN_ADMIN_CARDS,
+    BTN_ADMIN_ORDERS,
+    BTN_ADMIN_BROADCAST,
+    BTN_ADMIN_SETTINGS,
+    BTN_ADMIN_BACK,
+    BTN_BACK_TO_MAIN,
+    BTN_CANCEL,
+)
 
 
 # ============================================================
@@ -15,9 +32,9 @@ def main_menu_kb() -> ReplyKeyboardMarkup:
     """Foydalanuvchi uchun asosiy menyu."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="👤 Profil"), KeyboardButton(text="🎯 Ball yig'ish")],
-            [KeyboardButton(text="🛒 Buyurtma berish (Ball orqali)"), KeyboardButton(text="💎 Olmos sotib olish")],
-            [KeyboardButton(text="📦 Buyurtmalarim"), KeyboardButton(text="🆘 Yordam")],
+            [KeyboardButton(text=BTN_PROFILE), KeyboardButton(text=BTN_EARN_POINTS)],
+            [KeyboardButton(text=BTN_ORDER_POINTS), KeyboardButton(text=BTN_BUY_DIAMONDS)],
+            [KeyboardButton(text=BTN_MY_ORDERS), KeyboardButton(text=BTN_HELP)],
         ],
         resize_keyboard=True,
         input_field_placeholder="Menyudan tanlang..."
@@ -28,10 +45,10 @@ def admin_menu_kb() -> ReplyKeyboardMarkup:
     """Admin uchun kengaytirilgan asosiy menyu."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="📋 Yangi so'rovlar"), KeyboardButton(text="👥 Foydalanuvchilar")],
-            [KeyboardButton(text="� Kartalar"), KeyboardButton(text="�📢 Reklama yuborish")],
-            [KeyboardButton(text="⚙️ Bot sozlamalari"), KeyboardButton(text="📊 Statistika")],
-            [KeyboardButton(text="🔑 Adminni ko'chirish"), KeyboardButton(text="🔙 Oddiy menyu")],
+            [KeyboardButton(text=BTN_ADMIN_ORDERS), KeyboardButton(text=BTN_ADMIN_USERS)],
+            [KeyboardButton(text=BTN_ADMIN_CARDS), KeyboardButton(text=BTN_ADMIN_BROADCAST)],
+            [KeyboardButton(text=BTN_ADMIN_SETTINGS), KeyboardButton(text=BTN_ADMIN_STATS)],
+            [KeyboardButton(text="🔑 Adminni ko'chirish"), KeyboardButton(text=BTN_ADMIN_BACK)],
         ],
         resize_keyboard=True,
         input_field_placeholder="Admin paneli (V2.0)..."
@@ -102,6 +119,6 @@ def back_to_menu_kb() -> InlineKeyboardMarkup:
 def cancel_kb() -> ReplyKeyboardMarkup:
     """Holatni bekor qilish uchun Reply tugma."""
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="❌ Bekor qilish")]],
+        keyboard=[[KeyboardButton(text=BTN_CANCEL)]],
         resize_keyboard=True
     )

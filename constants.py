@@ -1,5 +1,5 @@
 # ============================================================
-# 📝 CONSTANTS - Textlarni saqlash
+# 📝 CONSTANTS - Textlarni saqlash (Free Fire uchun)
 # ============================================================
 
 # ============================================================
@@ -7,21 +7,22 @@
 # ============================================================
 BTN_PROFILE = "👤 Profil"
 BTN_EARN_POINTS = "🎯 Ball yig'ish"
-BTN_ORDER_POINTS = "🛒 Buyurtma berish (Ball orqali)"
+BTN_ORDER_POINTS = "� Olmos olish (Ball orqali)"
 BTN_BUY_DIAMONDS = "💎 Olmos sotib olish"
 BTN_MY_ORDERS = "📦 Buyurtmalarim"
 BTN_HELP = "🆘 Yordam"
 BTN_CANCEL = "❌ Bekor qilish"
-BTN_BACK_TO_MAIN = "🔙 Oddiy menyu"
+BTN_BACK_TO_MAIN = "🔙 Asosiy menyu"
 
 # ============================================================
 # ADMIN MENYU TUGMALARI
 # ============================================================
 BTN_ADMIN_STATS = "📊 Statistika"
 BTN_ADMIN_USERS = "👥 Foydalanuvchilar"
+BTN_ADMIN_CARDS = "� Kartalar"
 BTN_ADMIN_ORDERS = "📋 Yangi so'rovlar"
-BTN_ADMIN_SETTINGS = "⚙️ Sozlamalar"
 BTN_ADMIN_BROADCAST = "📢 Xabar yuborish"
+BTN_ADMIN_SETTINGS = "⚙️ Sozlamalar"
 BTN_ADMIN_BACK = "🔙 Admin menyu"
 
 # ============================================================
@@ -30,7 +31,7 @@ BTN_ADMIN_BACK = "🔙 Admin menyu"
 MSG_WELCOME = (
     "🔥 <b>Xush kelibsiz, {full_name}!</b>\n\n"
     "🎮 Bu bot orqali siz <b>Free Fire</b> o'yini uchun\n"
-    "bepul olmos (donat) olishingiz yoki sotib olishingiz mumkin!\n\n"
+    "bepul olmos (diamonds) olishingiz yoki sotib olishingiz mumkin!\n\n"
     "📌 <b>Asosiy qoidalar:</b>\n"
     "1️⃣ Do'stlaringizni taklif qiling — ball yig'ing\n"
     "2️⃣ Yig'ilgan ballarni olmosga almashtiring\n"
@@ -43,13 +44,13 @@ MSG_SUBSCRIBE_REQUIRED = (
 )
 
 MSG_ORDER_CONFIRM = (
-    "✅ <b>Buyurtma #{order_id} qabul qilindi!</b>\n\n"
+    "✅ <b>Olmos so'rovi #{order_id} qabul qilindi!</b>\n\n"
     "Tez orada admin ko'rib chiqadi va olmoslarni yuboradi."
 )
 
 MSG_ORDER_REJECTED = (
-    "❌ <b>Buyurtmangiz rad etildi.</b>\n\n"
-    "📋 Buyurtma #{order_id}\n"
+    "❌ <b>Olmos so'rovingiz rad etildi.</b>\n\n"
+    "📋 So'rov #{order_id}\n"
     "📝 Sabab: {reason}\n\n"
     "💎 {points} ball hisobingizga qaytarildi."
 )

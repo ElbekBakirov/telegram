@@ -34,6 +34,27 @@ from keyboards import (
     order_confirm_kb,
     admin_order_kb,
 )
+from constants import (
+    MSG_WELCOME,
+    MSG_SUBSCRIBE_REQUIRED,
+    MSG_ORDER_CONFIRM,
+    MSG_ORDER_REJECTED,
+    MSG_CANCELLED,
+    MSG_BANNED,
+    ERR_NOT_ENOUGH_POINTS,
+    ERR_ORDER_NOT_FOUND,
+    ERR_USER_NOT_FOUND,
+    ERR_INVALID_FF_ID,
+    ERR_SUBSCRIPTION_FAILED,
+    BTN_PROFILE,
+    BTN_EARN_POINTS,
+    BTN_ORDER_POINTS,
+    BTN_BUY_DIAMONDS,
+    BTN_MY_ORDERS,
+    BTN_HELP,
+    BTN_CANCEL,
+    BTN_BACK_TO_MAIN,
+)
 
 router = Router()
 
@@ -122,14 +143,8 @@ async def cmd_start(message: Message, state: FSMContext):
     ref_points = await get_setting("ref_points", POINTS_PER_REFERRAL)
 
     await message.answer(
-        f"🔥 <b>Xush kelibsiz, {full_name}!</b>\n\n"
-        f"🎮 Bu bot orqali siz <b>Free Fire</b> o'yini uchun\n"
-        f"bepul olmos (donat) olishingiz yoki sotib olishingiz mumkin!\n\n"
-        f"📌 <b>Asosiy qoidalar:</b>\n"
-        f"1️⃣ Do'stlaringizni taklif qiling — ball yig'ing\n"
-        f"2️⃣ Yig'ilgan ballarni olmosga almashtiring\n"
-        f"3️⃣ Yoki karta orqali arzon narxda sotib oling!\n\n"
-        f"💎 Minimal yechib olish: <b>{min_points} ball</b>\n"
+        MSG_WELCOME.format(full_name=full_name) +
+        f"\n\n💎 Minimal yechib olish: <b>{min_points} ball</b>\n"
         f"🎯 Har bir referal: <b>+{ref_points} ball</b>",
         parse_mode="HTML",
         reply_markup=main_menu_kb(),
@@ -139,7 +154,7 @@ async def cmd_start(message: Message, state: FSMContext):
 # ============================================================
 # 👤 PROFIL
 # ============================================================
-@router.message(F.text == "👤 Profil")
+@router.message(F.text == BTN_PROFILE)
 async def show_profile(message: Message):
     user = await get_user(message.from_user.id)
     ref_count = await count_referrals(user["user_id"])
@@ -160,7 +175,7 @@ async def show_profile(message: Message):
 # ============================================================
 # 🎯 BALL YIG'ISH (Yaxshilangan Referal Post)
 # ============================================================
-@router.message(F.text == "🎯 Ball yig'ish")
+@router.message(F.text == BTN_EARN_POINTS)
 async def earn_points(message: Message):
     user = await get_user(message.from_user.id)
     bot_info = await message.bot.get_me()
@@ -196,7 +211,7 @@ async def earn_points(message: Message):
 # ============================================================
 # 🛒 BUYURTMA BERISH (BALL ORQALI)
 # ============================================================
-@router.message(F.text == "🛒 Buyurtma berish (Ball orqali)")
+@router.message(F.text == BTN_ORDER_POINTS)
 async def start_order(message: Message, state: FSMContext):
     user = await get_user(message.from_user.id)
     min_points = int(await get_setting("min_points", MIN_POINTS_FOR_ORDER))
@@ -280,7 +295,7 @@ async def confirm_order(callback: CallbackQuery, state: FSMContext):
 # ============================================================
 # 💎 OLMOS SOTIB OLISH (PULLIK)
 # ============================================================
-@router.message(F.text == "💎 Olmos sotib olish")
+@router.message(F.text == BTN_BUY_DIAMONDS)
 async def buy_diamonds(message: Message):
     cards = await get_all_payment_cards()
     card_phone = await get_setting("card_phone", "Raqam kiritilmagan")
@@ -319,7 +334,7 @@ async def buy_diamonds(message: Message):
 # ============================================================
 # 🛑 HOLATNI BEKOR QILISH (FOYDALANUVCHI)
 # ============================================================
-@router.message(F.text == "❌ Bekor qilish")
+@router.message(F.text == BTN_CANCEL)
 @router.message(Command("cancel"))
 async def cancel_handler(message: Message, state: FSMContext):
     """Har qanday holatni bekor qilish va menyuga qaytish."""
@@ -329,7 +344,7 @@ async def cancel_handler(message: Message, state: FSMContext):
 
     await state.clear()
     await message.answer(
-        "❌ Amaliyot bekor qilindi.",
+        MSG_CANCELLED,
         reply_markup=main_menu_kb()
     )
 

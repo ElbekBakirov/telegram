@@ -35,6 +35,18 @@ from keyboards import (
     settings_manage_kb,
     cancel_kb
 )
+from constants import (
+    BTN_ADMIN_STATS,
+    BTN_ADMIN_USERS,
+    BTN_ADMIN_CARDS,
+    BTN_ADMIN_ORDERS,
+    BTN_ADMIN_BROADCAST,
+    BTN_ADMIN_SETTINGS,
+    BTN_ADMIN_BACK,
+    BTN_CANCEL,
+    MSG_ORDER_REJECTED,
+    MSG_CANCELLED,
+)
 
 router = Router()
 
@@ -42,17 +54,17 @@ router = Router()
 # ============================================================
 # 🛑 HOLATNI BEKOR QILISH (MAJBURIY CLEAR STATE)
 # ============================================================
-@router.message(F.text == "❌ Bekor qilish")
+@router.message(F.text == BTN_CANCEL)
 @router.message(Command("cancel"))
 async def cancel_handler(message: Message, state: FSMContext):
     """Har qanday holatni bekor qilish va menyuga qaytish."""
     current_state = await state.get_state()
     if current_state is None:
         return
-        
+
     await state.clear()
     await message.answer(
-        "❌ Amaliyot bekor qilindi.",
+        MSG_CANCELLED,
         reply_markup=admin_menu_kb() if await is_admin(message.from_user.id) else main_menu_kb()
     )
 
@@ -589,7 +601,7 @@ async def cancel_order_cb(callback: CallbackQuery, state: FSMContext):
 # 💳 KARTA BOSHQARISH
 # ============================================================
 
-@router.message(F.text == "💳 Kartalar")
+@router.message(F.text == BTN_ADMIN_CARDS)
 async def show_cards(message: Message):
     logger.info(f"📋 Kartalar handler ishga tushdi: {message.from_user.id}")
     if not await is_admin(message.from_user.id):
