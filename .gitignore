@@ -11,3 +11,4 @@ err.txt
 .vscode/
 .idea/
 scripts/
+add_default_card.py
