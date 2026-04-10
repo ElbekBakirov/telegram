@@ -19,11 +19,13 @@ BTN_BACK_TO_MAIN = "🔙 Asosiy menyu"
 # ============================================================
 BTN_ADMIN_STATS = "📊 Statistika"
 BTN_ADMIN_USERS = "👥 Foydalanuvchilar"
-BTN_ADMIN_CARDS = "� Kartalar"
+BTN_ADMIN_CARDS = "💳 Kartalar"
 BTN_ADMIN_ORDERS = "📋 Yangi so'rovlar"
 BTN_ADMIN_BROADCAST = "📢 Xabar yuborish"
 BTN_ADMIN_SETTINGS = "⚙️ Sozlamalar"
 BTN_ADMIN_BACK = "🔙 Admin menyu"
+BTN_ADMIN_MIGRATE = "🔑 Adminni ko'chirish"
+BTN_ADMIN_BACK_TO_MENU = "🔙 Oddiy menyu"
 
 # ============================================================
 # XABARLAR

@@ -43,6 +43,8 @@ from constants import (
     BTN_ADMIN_BROADCAST,
     BTN_ADMIN_SETTINGS,
     BTN_ADMIN_BACK,
+    BTN_ADMIN_MIGRATE,
+    BTN_ADMIN_BACK_TO_MENU,
     BTN_CANCEL,
     MSG_ORDER_REJECTED,
     MSG_CANCELLED,
@@ -98,7 +100,7 @@ class AdminState(StatesGroup):
 # ============================================================
 # 🔑 ADMIN KO'CHIRISH (MIGRATION)
 # ============================================================
-@router.message(F.text == "🔑 Adminni ko'chirish")
+@router.message(F.text == BTN_ADMIN_MIGRATE)
 async def start_migration(message: Message, state: FSMContext):
     if not await is_admin(message.from_user.id): return
     
@@ -252,7 +254,7 @@ async def cmd_admin(message: Message):
 # ============================================================
 # 👥 FOYDALANUVCHILAR BOSHQARUVI
 # ============================================================
-@router.message(F.text == "👥 Foydalanuvchilar")
+@router.message(F.text == BTN_ADMIN_USERS)
 async def manage_users(message: Message, state: FSMContext):
     if not await is_admin(message.from_user.id): return
     
@@ -318,7 +320,7 @@ async def unban_user_callback(callback: CallbackQuery):
 # ============================================================
 # 📢 REKLAMA (MAILING)
 # ============================================================
-@router.message(F.text == "📢 Reklama yuborish")
+@router.message(F.text == BTN_ADMIN_BROADCAST)
 async def start_broadcast(message: Message, state: FSMContext):
     if not await is_admin(message.from_user.id): return
     
@@ -349,7 +351,7 @@ async def process_broadcast(message: Message, state: FSMContext):
 # ============================================================
 # ⚙️ SOZLAMALAR
 # ============================================================
-@router.message(F.text == "⚙️ Bot sozlamalari")
+@router.message(F.text == BTN_ADMIN_SETTINGS)
 async def show_settings(message: Message):
     if not await is_admin(message.from_user.id): return
     
@@ -418,7 +420,7 @@ async def approve_order_proc(callback: CallbackQuery):
     await callback.answer()
 
 
-@router.message(F.text == "📊 Statistika")
+@router.message(F.text == BTN_ADMIN_STATS)
 async def show_stats(message: Message):
     if not await is_admin(message.from_user.id): return
     
@@ -446,7 +448,7 @@ async def show_stats(message: Message):
         
     await message.answer(text, parse_mode="HTML")
 
-@router.message(F.text == "🔙 Oddiy menyu")
+@router.message(F.text == BTN_ADMIN_BACK_TO_MENU)
 async def back_to_main(message: Message):
     await message.answer("Bosh menyuga qaytdingiz.", reply_markup=main_menu_kb())
 
@@ -454,7 +456,7 @@ async def back_to_main(message: Message):
 # ============================================================
 # 📋 YANGI SO'ROVLAR (PENDING ORDERS)
 # ============================================================
-@router.message(F.text == "📋 Yangi so'rovlar")
+@router.message(F.text == BTN_ADMIN_ORDERS)
 async def show_pending_orders(message: Message):
     if not await is_admin(message.from_user.id):
         return

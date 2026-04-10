@@ -359,7 +359,7 @@ async def check_sub_callback(callback: CallbackQuery):
         await callback.answer("❌ Kanalga hali a'zo emassiz!", show_alert=True)
 
 
-@router.message(F.text == "📦 Buyurtmalarim")
+@router.message(F.text == BTN_MY_ORDERS)
 async def my_orders(message: Message):
     orders = await get_user_orders(message.from_user.id)
     if not orders:
@@ -374,6 +374,6 @@ async def my_orders(message: Message):
     await message.answer(text, parse_mode="HTML")
 
 
-@router.message(F.text == "🆘 Yordam")
+@router.message(F.text == BTN_HELP)
 async def cmd_help(message: Message):
     await message.answer("Bot bo'yicha yordam kerak bo'lsa @admin bilan bog'laning.")

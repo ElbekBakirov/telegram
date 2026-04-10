@@ -19,6 +19,7 @@ from constants import (
     BTN_ADMIN_BROADCAST,
     BTN_ADMIN_SETTINGS,
     BTN_ADMIN_BACK,
+    BTN_ADMIN_MIGRATE,
     BTN_BACK_TO_MAIN,
     BTN_CANCEL,
 )
@@ -48,7 +49,7 @@ def admin_menu_kb() -> ReplyKeyboardMarkup:
             [KeyboardButton(text=BTN_ADMIN_ORDERS), KeyboardButton(text=BTN_ADMIN_USERS)],
             [KeyboardButton(text=BTN_ADMIN_CARDS), KeyboardButton(text=BTN_ADMIN_BROADCAST)],
             [KeyboardButton(text=BTN_ADMIN_SETTINGS), KeyboardButton(text=BTN_ADMIN_STATS)],
-            [KeyboardButton(text="🔑 Adminni ko'chirish"), KeyboardButton(text=BTN_ADMIN_BACK)],
+            [KeyboardButton(text=BTN_ADMIN_MIGRATE), KeyboardButton(text=BTN_ADMIN_BACK)],
         ],
         resize_keyboard=True,
         input_field_placeholder="Admin paneli (V2.0)..."
