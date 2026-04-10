@@ -70,8 +70,6 @@ async def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 card_number TEXT NOT NULL,
                 card_holder TEXT NOT NULL,
-                expiry_date TEXT NOT NULL,
-                bank_name TEXT NOT NULL,
                 is_active INTEGER DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -348,13 +346,13 @@ async def get_stats() -> dict:
 # KARTA FUNKSIYALARI
 # ============================================================
 
-async def add_payment_card(card_number: str, card_holder: str, expiry_date: str, bank_name: str) -> int:
+async def add_payment_card(card_number: str, card_holder: str) -> int:
     """Yangi karta qo'shish. Qaytadi: card ID."""
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute("""
-            INSERT INTO payment_cards (card_number, card_holder, expiry_date, bank_name)
-            VALUES (?, ?, ?, ?)
-        """, (card_number, card_holder, expiry_date, bank_name))
+            INSERT INTO payment_cards (card_number, card_holder)
+            VALUES (?, ?)
+        """, (card_number, card_holder))
         await db.commit()
         return cursor.lastrowid
 

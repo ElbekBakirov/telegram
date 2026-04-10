@@ -316,10 +316,8 @@ async def buy_diamonds(message: Message):
 
     for card in cards:
         text += (
-            f"🏦 <b>{card['bank_name']}</b>\n"
             f"💳 Karta: <code>{card['card_number']}</code>\n"
             f"👤 Egal: {card['card_holder']}\n"
-            f"� Muddat: {card['expiry_date']}\n"
             f"➖➖➖➖➖➖➖➖➖➖\n"
         )
 

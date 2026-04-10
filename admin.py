@@ -93,8 +93,6 @@ class AdminState(StatesGroup):
     # Karta boshqarish holatlari
     waiting_for_card_number = State()
     waiting_for_card_holder = State()
-    waiting_for_expiry_date = State()
-    waiting_for_bank_name = State()
 
 
 # ============================================================
@@ -629,10 +627,8 @@ async def show_cards(message: Message):
     for card in cards:
         text += (
             f"🔹 <b>ID: {card['id']}</b>\n"
-            f"🏦 Bank: {card['bank_name']}\n"
             f"💳 Karta: {card['card_number']}\n"
             f"👤 Egal: {card['card_holder']}\n"
-            f"📅 Muddat: {card['expiry_date']}\n"
             f"➖➖➖➖➖➖➖➖➖➖\n"
         )
         buttons.append([InlineKeyboardButton(text=f"🗑️ O'chirish (ID: {card['id']})", callback_data=f"delete_card:{card['id']}")])
@@ -692,59 +688,15 @@ async def process_card_holder(message: Message, state: FSMContext):
         return
 
     card_holder = message.text.strip()
-    await state.update_data(card_holder=card_holder)
-    await state.set_state(AdminState.waiting_for_expiry_date)
-
-    await message.answer(
-        "📅 <b>Muddatni kiriting (MM/YY formatida):</b>\n\n"
-        "Misol: 12/25",
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="back_to_admin")]
-            ]
-        ),
-        parse_mode="HTML"
-    )
-
-
-@router.message(AdminState.waiting_for_expiry_date)
-async def process_expiry_date(message: Message, state: FSMContext):
-    if not await is_admin(message.from_user.id):
-        return
-
-    expiry_date = message.text.strip()
-    await state.update_data(expiry_date=expiry_date)
-    await state.set_state(AdminState.waiting_for_bank_name)
-
-    await message.answer(
-        "🏦 <b>Bank nomini kiriting:</b>\n\n"
-        "Misol: UzumBank, TBC Bank, Payme",
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="back_to_admin")]
-            ]
-        ),
-        parse_mode="HTML"
-    )
-
-
-@router.message(AdminState.waiting_for_bank_name)
-async def process_bank_name(message: Message, state: FSMContext):
-    if not await is_admin(message.from_user.id):
-        return
-
-    bank_name = message.text.strip()
     data = await state.get_data()
 
     card_number = data.get("card_number")
-    card_holder = data.get("card_holder")
-    expiry_date = data.get("expiry_date")
 
-    logger.info(f"💳 Karta qo'shmoqda: {bank_name} - {card_number}")
+    logger.info(f"💳 Karta qo'shmoqda: {card_holder} - {card_number}")
 
     # Karta qo'shish
     try:
-        card_id = await add_payment_card(card_number, card_holder, expiry_date, bank_name)
+        card_id = await add_payment_card(card_number, card_holder)
         logger.info(f"✅ Karta qo'shildi: ID={card_id}")
     except Exception as e:
         logger.error(f"❌ Karta qo'shishda xato: {e}")
@@ -760,9 +712,7 @@ async def process_bank_name(message: Message, state: FSMContext):
         f"✅ <b>Karta muvaffaqiyatli qo'shildi!</b>\n\n"
         f"🔹 ID: {card_id}\n"
         f"💳 Karta: {card_number}\n"
-        f"👤 Egal: {card_holder}\n"
-        f"📅 Muddat: {expiry_date}\n"
-        f"🏦 Bank: {bank_name}",
+        f"👤 Egal: {card_holder}",
         reply_markup=admin_menu_kb(),
         parse_mode="HTML"
     )
