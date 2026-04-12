@@ -9,8 +9,11 @@ logger = logging.getLogger(__name__)
 
 from utils import notify_admins
 from config import (
-    CHANNEL_ID,
+    ADMIN_IDS,
+    ADMIN_USERNAME,
     CHANNEL_USERNAME,
+    CHANNEL_ID,
+    OTZIV_GROUP_ID,
     POINTS_PER_REFERRAL,
     MIN_POINTS_FOR_ORDER,
 )
@@ -321,10 +324,11 @@ async def buy_diamonds(message: Message):
             f"➖➖➖➖➖➖➖➖➖➖\n"
         )
 
-    text += f"\n�📞 <b>Bog'lanish:</b> {card_phone}\n\n"
+    text += f"\n📞 <b>Bog'lanish:</b> {card_phone}\n"
+    text += f"👨‍💼 <b>Admin:</b> @{ADMIN_USERNAME}\n\n"
     text += f"📜 <b>Sotib olish shartlari:</b>\n"
     text += f"{buy_rules}\n\n"
-    text += "⚠️ To'lov qilganingizdan so'ng, chekni va Free Fire ID raqamingizni @admin ga yuboring."
+    text += "⚠️ To'lov qilganingizdan so'ng, chekni va Free Fire ID raqamingizni @{ADMIN_USERNAME} ga yuboring."
 
     await message.answer(text, parse_mode="HTML")
 

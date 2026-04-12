@@ -11,6 +11,9 @@ ADMIN_IDS: list[int] = [
     int(x.strip()) for x in os.getenv("ADMIN_IDS", "").split(",") if x.strip().isdigit()
 ]
 
+# Admin username (almaz sotib olish uchun)
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+
 # Majburiy kanal
 CHANNEL_ID: str = os.getenv("CHANNEL_ID", "")
 CHANNEL_USERNAME: str = os.getenv("CHANNEL_USERNAME", "@kanal")
